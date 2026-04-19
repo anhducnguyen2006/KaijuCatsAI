@@ -1,7 +1,6 @@
-import MapGeneration as mg
 import InstructionGen as ig
 
-def simulation(map, instructions):
+def simulation(board, instructions):
 
     # Buildings: 
     #  1. High Value Building [HV] (worth 500 points, two floors = 2 commands can be placed on each floor)
@@ -13,7 +12,7 @@ def simulation(map, instructions):
     #  3. Boulder [B] (blocks the cat, rebounds back to opposite direction)
     # Neutral: Empty Tile [ET] (no command can be issued on this tile, cats can pass through without any effect)
 
-    # Position of cats (initially standing on an Empty Tile outside of the map)
+    # Position of cats (initially standing on an Empty Tile outside of the board)
     # Blue cat top left corner (0, -1)
     # Red cat middle left (2, -1)
     # Green cat bottom left corner (4, -1)
@@ -21,7 +20,7 @@ def simulation(map, instructions):
     RED_CAT_START = (2, -1)
     GREEN_CAT_START = (4, -1)
     
-    # Position of their respective beds (outside of the map on the right side)
+    # Position of their respective beds (outside of the board on the right side)
     # Blue cat bed (1, 5)
     # Red cat bed (2, 5)
     # Green cat bed (3, 5)
@@ -76,7 +75,7 @@ def simulation(map, instructions):
     print(f"Blue Cat - Position: {blue['pos']}, Power: {blue['power']}, Direction: {blue['dir']}, Action: {blue['action']}")
     print(f"Red Cat - Position: {red['pos']}, Power: {red['power']}, Direction: {red['dir']}, Action: {red['action']}")
     print(f"Green Cat - Position: {green['pos']}, Power: {green['power']}, Direction: {green['dir']}, Action: {green['action']}")
-    print("-" * 30)
+    print("-" * 100)
 
     # simulation of the game
     for i in range(15):
@@ -92,22 +91,45 @@ def simulation(map, instructions):
             if cat['pos'] == BLUE_CAT_BED or cat['pos'] == RED_CAT_BED or cat['pos'] == GREEN_CAT_BED:
                 continue
             
+            # move only if no action was assigned to the cat, otherwise the cat will perform the action first before moving
+            move = True
+
+            # Handle actions of cats
+            if cat['action'] == "STUCK":
+                cat['action'] = None  # Cat is now unstuck and can move in the next turn
+                continue  # Skip the rest of the turn for this cat since it's stuck
+                move = False
+            elif cat['action'] == "SP":
+                # Stomp command destroys an additional floor, so we increment destroyed_floors by 1 more
+                # this indirectly handles the case where the cat stomps on nothing (eg. stomp on the last floor of a building or power plant)
+                if instructions[cat['pos'][0]][cat['pos'][1]] is not None and destroyed_floors[cat['pos'][0]][cat['pos'][1]] < len(instructions[cat['pos'][0]][cat['pos'][1]]):
+                    cat['action'] = instructions[cat['pos'][0]][cat['pos'][1]][destroyed_floors[cat['pos'][0]][cat['pos'][1]]]
+                destroyed_floors[cat['pos'][0]][cat['pos'][1]] += 1
+                move = False
+
+            if move == False:
+                continue
+
             new_pos = tuple(x + y for x, y in zip(cat['pos'], directions[cat['dir']]))
-            print(new_pos)
+            #print(new_pos)
 
             # check if valid move (not out of bounds)
-            if new_pos >= (0, 0) and new_pos < (5, 5):
+            if new_pos[0] >= 0 and new_pos[0] < 5 and new_pos[1] >= 0 and new_pos[1] < 5 and cat['action'] is None:
                 cat['pos'] = new_pos
                 
                 # Check if the tile has a building and if it still has floors left
-                if map[cat['pos'][0]][cat['pos'][1]] in values and destroyed_floors[cat['pos'][0]][cat['pos'][1]] < len(instructions[cat['pos'][0]][cat['pos'][1]]):
-                    destroyed_floors[cat['pos'][0]][cat['pos'][1]] += 1
-                    cat['power'] = values[map[cat['pos'][0]][cat['pos'][1]]](cat['power'])
+                if board[cat['pos'][0]][cat['pos'][1]] in values and destroyed_floors[cat['pos'][0]][cat['pos'][1]] < len(instructions[cat['pos'][0]][cat['pos'][1]]):
+                    cat['power'] = values[board[cat['pos'][0]][cat['pos'][1]]](cat['power'])
+                    # handle Power Up here
+                    if instructions[cat['pos'][0]][cat['pos'][1]] == "PU":
+                        # Remove the Power Up instruction after using it
+                        instructions[cat['pos'][0]][cat['pos'][1]][destroyed_floors[cat['pos'][0]][cat['pos'][1]]] = None 
+                        cat['power'] += 1000
                 else:
-                    if map[cat['pos'][0]][cat['pos'][1]] == "M ":
+                    if board[cat['pos'][0]][cat['pos'][1]] == "M ":
                         # Cat is stuck for one turn, so we set its action to "STUCK" and it will skip its next turn
                         cat['action'] = "STUCK"
-                    elif map[cat['pos'][0]][cat['pos'][1]] == "B ":
+                    elif board[cat['pos'][0]][cat['pos'][1]] == "B ":
                         # Rebound back to opposite direction
                         cat['pos'] = (cat['pos'][0] - directions[cat['dir']][0], cat['pos'][1] - directions[cat['dir']][1]) 
                         if cat['dir'] == "N":
@@ -121,8 +143,23 @@ def simulation(map, instructions):
                     # If it's an empty tile or all floors are destroyed, just pass through without any effect
                 
                 if instructions[cat['pos'][0]][cat['pos'][1]] is not None and destroyed_floors[cat['pos'][0]][cat['pos'][1]] < len(instructions[cat['pos'][0]][cat['pos'][1]]):
-                    if instructions[cat['pos'][0]][cat['pos'][1]][destroyed_floors[cat['pos'][0]][cat['pos'][1]]] is not None:
-                        cat['action'] = instructions[cat['pos'][0]][cat['pos'][1]][destroyed_floors[cat['pos'][0]][cat['pos'][1]]]
+                    next_instruction = instructions[cat['pos'][0]][cat['pos'][1]][destroyed_floors[cat['pos'][0]][cat['pos'][1]]]
+                    if next_instruction is not None:
+                        # only assign action if it's not Power Up since Power Up is handled separately and doesn't 
+                        # need to be assigned as an action for the cat to perform in the next turn
+                        if next_instruction == "PU":
+                            continue
+                        elif next_instruction in ["N", "S", "E", "W"]:
+                            cat['dir'] = next_instruction
+                        else:
+                            cat['action'] = next_instruction
+                    instructions[cat['pos'][0]][cat['pos'][1]][destroyed_floors[cat['pos'][0]][cat['pos'][1]]] = None
+                    destroyed_floors[cat['pos'][0]][cat['pos'][1]] += 1
+            
+            # Case if trying to move out of bounds, but it's a bed so it's a valid move and cat can step on it
+            elif new_pos == BLUE_CAT_BED or new_pos == RED_CAT_BED or new_pos == GREEN_CAT_BED:
+                cat['pos'] = new_pos
+
             else: 
                 # rebound back to opposite direction if trying to move out of bounds
                 if cat['dir'] == "N":
@@ -462,20 +499,41 @@ def simulation(map, instructions):
                     red['power'] = 0
 
         print(f"Turn {i + 1}:")
-        print(f"Blue Cat - Position: {blue['pos']}, Power: {blue['power']}, Direction: {blue['dir']}, Action: {blue['action']}")
-        print(f"Red Cat - Position: {red['pos']}, Power: {red['power']}, Direction: {red['dir']}, Action: {red['action']}")
-        print(f"Green Cat - Position: {green['pos']}, Power: {green['power']}, Direction: {green['dir']}, Action: {green['action']}")
-        print("-" * 30)
+        
+        # print the position, power, direction, and action of each cat after each turn
+        # or if it's in the bed, print that it's in the bed instead of its position
+        if blue['pos'] == BLUE_CAT_BED:
+            print(f"Blue Cat - Position: IN BED, Power: {blue['power']}")
+        else:  
+            print(f"Blue Cat - Position: {blue['pos']}, Power: {blue['power']}, Direction: {blue['dir']}, Action: {blue['action']}")
+        
+        if red['pos'] == RED_CAT_BED:
+            print(f"Red Cat - Position: IN BED, Power: {red['power']}")
+        else:
+            print(f"Red Cat - Position: {red['pos']}, Power: {red['power']}, Direction: {red['dir']}, Action: {red['action']}")
+        
+        if green['pos'] == GREEN_CAT_BED:
+            print(f"Green Cat - Position: IN BED, Power: {green['power']}")
+        else:
+            print(f"Green Cat - Position: {green['pos']}, Power: {green['power']}, Direction: {green['dir']}, Action: {green['action']}")
+        print("-" * 100)
+    
+    # print final results after 15 turns
+    print("\n")
+    print("-" * 100)
+    print("GAME OVER: 15 turns have passed!")
+    print(f"Final Results:")
+    print(f"Blue Cat: {blue['power']}")
+    print(f"Red Cat: {red['power']}")
+    print(f"Green Cat: {green['power']}")
+    print(f"TOTAL POWER: {blue['power'] + red['power'] + green['power']}")
+    print("-" * 100)
+    return blue["power"], red["power"], green["power"]
 
     
-    
-    
-    
-    
-    
 def main():
-    map, instructions, budget = ig.generate_instructions()
-    simulation(map, instructions)
+    board, instructions, budget = ig.generate_instructions(42)
+    score = simulation(board, instructions)
     
         
 if __name__ == "__main__":
