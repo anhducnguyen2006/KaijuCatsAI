@@ -170,8 +170,10 @@ def simulation(board, instructions):
                     cat['dir'] = "W"
                 elif cat['dir'] == "W":
                     cat['dir'] = "E"
-        
 
+            # update board in case a building is destroyed in some tile, change it into Empty Tile (ET)
+            if board[cat['pos'][0]][cat['pos'][1]] in values and destroyed_floors[cat['pos'][0]][cat['pos'][1]] >= len(instructions[cat['pos'][0]][cat['pos'][1]]):
+                board[cat['pos'][0]][cat['pos'][1]] = "ET"
         ### CASE #1: All cats reach their bed on the same turn ###
         # if two or more cats reach their bed on the same turn, the cat with the highest 
         # priority:
@@ -499,7 +501,7 @@ def simulation(board, instructions):
                     red['power'] = 0
 
         print(f"Turn {i + 1}:")
-        
+
         # print the position, power, direction, and action of each cat after each turn
         # or if it's in the bed, print that it's in the bed instead of its position
         if blue['pos'] == BLUE_CAT_BED:
