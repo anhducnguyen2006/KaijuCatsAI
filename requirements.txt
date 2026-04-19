@@ -1,2 +1,2 @@
-Numpy
-PyTorch
+numpy
+torch
