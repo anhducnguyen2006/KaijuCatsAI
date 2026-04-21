@@ -1,3 +1,10 @@
+'''
+Kaiju Cats AI - Instruction Generation Module
+
+@author: Anh Duc Nguyen
+@date: 2026-03-02
+'''
+
 from numpy import random
 
 import BoardGeneration as bg

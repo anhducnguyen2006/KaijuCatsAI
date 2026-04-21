@@ -1,3 +1,10 @@
+'''
+Kaiju Cats Roblox game simulation script.
+
+@author: Anh Duc Nguyen
+@date: 2026-03-02
+'''
+
 import InstructionGen as ig
 
 def simulation(board, instructions):
@@ -80,6 +87,11 @@ def simulation(board, instructions):
     # simulation of the game
     for i in range(15):
 
+        # Record which cats were already in bed before this turn's moves
+        blue_in_bed_before = (blue['pos'] == BLUE_CAT_BED)
+        red_in_bed_before = (red['pos'] == RED_CAT_BED)
+        green_in_bed_before = (green['pos'] == GREEN_CAT_BED)
+
         # Simulate each Cat's turn
         for cat in priority:
             
@@ -117,13 +129,16 @@ def simulation(board, instructions):
             if new_pos[0] >= 0 and new_pos[0] < 5 and new_pos[1] >= 0 and new_pos[1] < 5 and cat['action'] is None:
                 cat['pos'] = new_pos
                 
+                # ST always halves points regardless of floors (it is never destroyed)
+                if board[cat['pos'][0]][cat['pos'][1]] == "ST":
+                    cat['power'] = values["ST"](cat['power'])
                 # Check if the tile has a building and if it still has floors left
-                if board[cat['pos'][0]][cat['pos'][1]] in values and destroyed_floors[cat['pos'][0]][cat['pos'][1]] < len(instructions[cat['pos'][0]][cat['pos'][1]]):
+                elif board[cat['pos'][0]][cat['pos'][1]] in values and instructions[cat['pos'][0]][cat['pos'][1]] is not None and destroyed_floors[cat['pos'][0]][cat['pos'][1]] < len(instructions[cat['pos'][0]][cat['pos'][1]]):
                     cat['power'] = values[board[cat['pos'][0]][cat['pos'][1]]](cat['power'])
                     # handle Power Up here
                     if instructions[cat['pos'][0]][cat['pos'][1]] == "PU":
                         # Remove the Power Up instruction after using it
-                        instructions[cat['pos'][0]][cat['pos'][1]][destroyed_floors[cat['pos'][0]][cat['pos'][1]]] = None 
+                        instructions[cat['pos'][0]][cat['pos'][1]][destroyed_floors[cat['pos'][0]][cat['pos'][1]]] = None
                         cat['power'] += 1000
                 else:
                     if board[cat['pos'][0]][cat['pos'][1]] == "M ":
@@ -131,7 +146,7 @@ def simulation(board, instructions):
                         cat['action'] = "STUCK"
                     elif board[cat['pos'][0]][cat['pos'][1]] == "B ":
                         # Rebound back to opposite direction
-                        cat['pos'] = (cat['pos'][0] - directions[cat['dir']][0], cat['pos'][1] - directions[cat['dir']][1]) 
+                        cat['pos'] = (cat['pos'][0] - directions[cat['dir']][0], cat['pos'][1] - directions[cat['dir']][1])
                         if cat['dir'] == "N":
                             cat['dir'] = "S"
                         elif cat['dir'] == "S":
@@ -172,23 +187,21 @@ def simulation(board, instructions):
                     cat['dir'] = "E"
 
             # update board in case a building is destroyed in some tile, change it into Empty Tile (ET)
-            if board[cat['pos'][0]][cat['pos'][1]] in values and destroyed_floors[cat['pos'][0]][cat['pos'][1]] >= len(instructions[cat['pos'][0]][cat['pos'][1]]):
+            if cat['pos'] is not None and 0 <= cat['pos'][0] < 5 and 0 <= cat['pos'][1] < 5 and board[cat['pos'][0]][cat['pos'][1]] not in ["ST", "ET", "M ", "B "] and instructions[cat['pos'][0]][cat['pos'][1]] is not None and destroyed_floors[cat['pos'][0]][cat['pos'][1]] >= len(instructions[cat['pos'][0]][cat['pos'][1]]):
                 board[cat['pos'][0]][cat['pos'][1]] = "ET"
-        ### CASE #1: All cats reach their bed on the same turn ###
-        # if two or more cats reach their bed on the same turn, the cat with the highest 
-        # priority:
-        
-        # 1st priority: power (cat with lowest power gets the highest priority).
+        # Determine which cats just arrived at their bed this turn (reward applied once only)
+        blue_just_arrived = (blue['pos'] == BLUE_CAT_BED and not blue_in_bed_before)
+        red_just_arrived = (red['pos'] == RED_CAT_BED and not red_in_bed_before)
+        green_just_arrived = (green['pos'] == GREEN_CAT_BED and not green_in_bed_before)
 
-        # if tie in power, 2nd priority (Blue > Red > Green) will be considered to have reached its bed first and will 
-        # be awarded points accordingly.
+        ### CASE #1: Bed arrival rewards (each cat rewarded exactly once on arrival turn) ###
+        # Priority for rewards is determined by power (lowest power = highest priority).
+        # If tied on power, Blue > Red > Green by position in priority list.
+        # 1st to arrive (highest priority): +2000 power
+        # 2nd to arrive: x3 power
+        # 3rd to arrive: x5 power
 
-        # the highest priority: +2000 power
-        # the second priority: x3 power
-        # the third priority: x5 power
-
-        # if 3 simultaneously reach their bed, Blue gets +2000 power, Red gets x3 power, Green gets x5 power
-        if blue['pos'] == BLUE_CAT_BED and red['pos'] == RED_CAT_BED and green['pos'] == GREEN_CAT_BED:
+        if blue_just_arrived and red_just_arrived and green_just_arrived:
             if blue['power'] < red['power']:
                 if blue['power'] < green['power']:
                     blue['power'] += 2000
@@ -199,7 +212,6 @@ def simulation(board, instructions):
                         red['power'] *= 5
                         green['power'] *= 3
                     else:
-                        # based on priority list
                         if priority.index(red) < priority.index(green):
                             red['power'] *= 3
                             green['power'] *= 5
@@ -211,7 +223,6 @@ def simulation(board, instructions):
                     blue['power'] *= 3
                     red['power'] *= 5
                 else:
-                    # based on priority list
                     if priority.index(blue) < priority.index(green):
                         blue['power'] += 2000
                         green['power'] *= 3
@@ -230,7 +241,6 @@ def simulation(board, instructions):
                         red['power'] *= 3
                         green['power'] += 2000
                     else:
-                        # based on priority list
                         if priority.index(red) < priority.index(green):
                             red['power'] += 2000
                             green['power'] *= 3
@@ -242,7 +252,6 @@ def simulation(board, instructions):
                     blue['power'] *= 3
                     red['power'] += 2000
                 else:
-                    # based on priority list
                     if priority.index(blue) < priority.index(green):
                         blue['power'] *= 3
                         green['power'] *= 5
@@ -252,41 +261,32 @@ def simulation(board, instructions):
                         blue['power'] *= 5
                         red['power'] += 2000
             else:
-                # based on priority list
                 priority[0]['power'] += 2000
                 priority[1]['power'] *= 3
                 priority[2]['power'] *= 5
-
             print("\n")
             print("-" * 30)
-            print("GAME OVER: All cats reached their bed at the same turn!")
+            print("GAME OVER: All cats reached their bed!")
             return blue["power"], red["power"], green["power"]
-        
-        # if 2 simultaneously reach their bed, 
-        # if 3rd one is already in bed:
-        #   the one with higher priority gets x3 power, the other gets x5 power
-        # otherwise the one with higher priority gets +2000 power, the other gets x3 power
-        elif blue['pos'] == BLUE_CAT_BED and red['pos'] == RED_CAT_BED:
+
+        elif blue_just_arrived and red_just_arrived:
             if green['pos'] == GREEN_CAT_BED:
-                
                 if blue['power'] < red['power']:
                     blue['power'] *= 3
                     red['power'] *= 5
                 elif blue['power'] > red['power']:
-                    blue['power'] *= 3
-                    red['power'] *= 5
+                    blue['power'] *= 5
+                    red['power'] *= 3
                 else:
-                    # based on priority list
                     if priority.index(blue) < priority.index(red):
                         blue['power'] *= 3
                         red['power'] *= 5
                     else:
                         blue['power'] *= 5
                         red['power'] *= 3
-                
                 print("\n")
                 print("-" * 30)
-                print("GAME OVER: All cats reached their bed at the same turn!")
+                print("GAME OVER: All cats reached their bed!")
                 return blue["power"], red["power"], green["power"]
             else:
                 if blue['power'] < red['power']:
@@ -296,17 +296,15 @@ def simulation(board, instructions):
                     blue['power'] *= 3
                     red['power'] += 2000
                 else:
-                    # based on priority list
                     if priority.index(blue) < priority.index(red):
                         blue['power'] += 2000
                         red['power'] *= 3
                     else:
                         blue['power'] *= 3
                         red['power'] += 2000
-        # same here
-        elif blue['pos'] == BLUE_CAT_BED and green['pos'] == GREEN_CAT_BED:
+
+        elif blue_just_arrived and green_just_arrived:
             if red['pos'] == RED_CAT_BED:
-                    
                 if blue['power'] < green['power']:
                     blue['power'] *= 3
                     green['power'] *= 5
@@ -314,16 +312,15 @@ def simulation(board, instructions):
                     blue['power'] *= 5
                     green['power'] *= 3
                 else:
-                    # based on priority list
                     if priority.index(blue) < priority.index(green):
-                        blue['power'] += 2000
-                        green['power'] *= 3
-                    else:
                         blue['power'] *= 3
-                        green['power'] += 2000
+                        green['power'] *= 5
+                    else:
+                        blue['power'] *= 5
+                        green['power'] *= 3
                 print("\n")
                 print("-" * 30)
-                print("GAME OVER: All cats reached their bed at the same turn!")
+                print("GAME OVER: All cats reached their bed!")
                 return blue["power"], red["power"], green["power"]
             else:
                 if blue['power'] < green['power']:
@@ -333,15 +330,14 @@ def simulation(board, instructions):
                     blue['power'] *= 3
                     green['power'] += 2000
                 else:
-                    # based on priority list
                     if priority.index(blue) < priority.index(green):
                         blue['power'] += 2000
                         green['power'] *= 3
                     else:
                         blue['power'] *= 3
                         green['power'] += 2000
-        # same here
-        elif red['pos'] == RED_CAT_BED and green['pos'] == GREEN_CAT_BED:
+
+        elif red_just_arrived and green_just_arrived:
             if blue['pos'] == BLUE_CAT_BED:
                 if red['power'] < green['power']:
                     red['power'] *= 3
@@ -350,7 +346,6 @@ def simulation(board, instructions):
                     red['power'] *= 5
                     green['power'] *= 3
                 else:
-                    # based on priority list
                     if priority.index(red) < priority.index(green):
                         red['power'] *= 3
                         green['power'] *= 5
@@ -359,7 +354,7 @@ def simulation(board, instructions):
                         green['power'] *= 3
                 print("\n")
                 print("-" * 30)
-                print("GAME OVER: All cats reached their bed at the same turn!")
+                print("GAME OVER: All cats reached their bed!")
                 return blue["power"], red["power"], green["power"]
             else:
                 if red['power'] < green['power']:
@@ -369,50 +364,46 @@ def simulation(board, instructions):
                     red['power'] *= 3
                     green['power'] += 2000
                 else:
-                    # based on priority list
                     if priority.index(red) < priority.index(green):
                         red['power'] += 2000
                         green['power'] *= 3
                     else:
                         red['power'] *= 3
                         green['power'] += 2000
-        # here, if only one cat reaches its bed, it gets +2000 power, 
-        # if the other cats are already in their bed, then it gets x3 power, 
-        # if both other cats are already in their bed, then it gets x5 power
-        elif blue['pos'] == BLUE_CAT_BED:
-            if red['pos'] == RED_CAT_BED:
-                if green['pos'] == GREEN_CAT_BED:
-                    blue['power'] *= 5
-                    print("\n")
-                    print("-" * 30)
-                    print("GAME OVER: All cats reached their bed at the same turn!")
-                    return blue["power"], red["power"], green["power"]
-                else:
-                    blue['power'] *= 3
+
+        elif blue_just_arrived:
+            if red['pos'] == RED_CAT_BED and green['pos'] == GREEN_CAT_BED:
+                blue['power'] *= 5
+                print("\n")
+                print("-" * 30)
+                print("GAME OVER: All cats reached their bed!")
+                return blue["power"], red["power"], green["power"]
+            elif red['pos'] == RED_CAT_BED or green['pos'] == GREEN_CAT_BED:
+                blue['power'] *= 3
             else:
                 blue['power'] += 2000
-        elif red['pos'] == RED_CAT_BED:
-            if blue['pos'] == BLUE_CAT_BED:
-                if green['pos'] == GREEN_CAT_BED:
-                    red['power'] *= 5
-                    print("\n")
-                    print("-" * 30)
-                    print("GAME OVER: All cats reached their bed at the same turn!")
-                    return blue["power"], red["power"], green["power"]
-                else:
-                    red['power'] *= 3
+
+        elif red_just_arrived:
+            if blue['pos'] == BLUE_CAT_BED and green['pos'] == GREEN_CAT_BED:
+                red['power'] *= 5
+                print("\n")
+                print("-" * 30)
+                print("GAME OVER: All cats reached their bed!")
+                return blue["power"], red["power"], green["power"]
+            elif blue['pos'] == BLUE_CAT_BED or green['pos'] == GREEN_CAT_BED:
+                red['power'] *= 3
             else:
                 red['power'] += 2000
-        elif green['pos'] == GREEN_CAT_BED:
-            if blue['pos'] == BLUE_CAT_BED:
-                if red['pos'] == RED_CAT_BED:
-                    green['power'] *= 5
-                    print("\n")
-                    print("-" * 30)
-                    print("GAME OVER: All cats reached their bed at the same turn!")
-                    return blue["power"], red["power"], green["power"]
-                else:
-                    green['power'] *= 3
+
+        elif green_just_arrived:
+            if blue['pos'] == BLUE_CAT_BED and red['pos'] == RED_CAT_BED:
+                green['power'] *= 5
+                print("\n")
+                print("-" * 30)
+                print("GAME OVER: All cats reached their bed!")
+                return blue["power"], red["power"], green["power"]
+            elif blue['pos'] == BLUE_CAT_BED or red['pos'] == RED_CAT_BED:
+                green['power'] *= 3
             else:
                 green['power'] += 2000
 
@@ -534,6 +525,7 @@ def simulation(board, instructions):
 
     
 def main():
+    # Example usage of the simulation with randomly generated instructions
     board, instructions, budget = ig.generate_instructions(42)
     score = simulation(board, instructions)
     
