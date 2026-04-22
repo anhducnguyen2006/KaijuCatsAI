@@ -6,6 +6,7 @@ Kaiju Cats Roblox game simulation script.
 '''
 
 import InstructionGen as ig
+import time
 
 def simulation(board, instructions):
 
@@ -78,11 +79,11 @@ def simulation(board, instructions):
     }
 
     # for each cat, we will print their initial position, power, and direction
-    print(f"Initial Cat States:")
-    print(f"Blue Cat - Position: {blue['pos']}, Power: {blue['power']}, Direction: {blue['dir']}, Action: {blue['action']}")
-    print(f"Red Cat - Position: {red['pos']}, Power: {red['power']}, Direction: {red['dir']}, Action: {red['action']}")
-    print(f"Green Cat - Position: {green['pos']}, Power: {green['power']}, Direction: {green['dir']}, Action: {green['action']}")
-    print("-" * 100)
+    # print(f"Initial Cat States:")
+    # print(f"Blue Cat - Position: {blue['pos']}, Power: {blue['power']}, Direction: {blue['dir']}, Action: {blue['action']}")
+    # print(f"Red Cat - Position: {red['pos']}, Power: {red['power']}, Direction: {red['dir']}, Action: {red['action']}")
+    # print(f"Green Cat - Position: {green['pos']}, Power: {green['power']}, Direction: {green['dir']}, Action: {green['action']}")
+    # print("-" * 100)
 
     # simulation of the game
     for i in range(15):
@@ -265,8 +266,14 @@ def simulation(board, instructions):
                 priority[1]['power'] *= 3
                 priority[2]['power'] *= 5
             print("\n")
-            print("-" * 30)
-            print("GAME OVER: All cats reached their bed!")
+            print("-" * 100)
+            print("GAME OVER: 15 turns have passed!")
+            print(f"Final Results:")
+            print(f"Blue Cat: {blue['power']}")
+            print(f"Red Cat: {red['power']}")
+            print(f"Green Cat: {green['power']}")
+            print(f"TOTAL POWER: {blue['power'] + red['power'] + green['power']}")
+            print("-" * 100)
             return blue["power"], red["power"], green["power"]
 
         elif blue_just_arrived and red_just_arrived:
@@ -285,8 +292,14 @@ def simulation(board, instructions):
                         blue['power'] *= 5
                         red['power'] *= 3
                 print("\n")
-                print("-" * 30)
-                print("GAME OVER: All cats reached their bed!")
+                print("-" * 100)
+                print("GAME OVER: 15 turns have passed!")
+                print(f"Final Results:")
+                print(f"Blue Cat: {blue['power']}")
+                print(f"Red Cat: {red['power']}")
+                print(f"Green Cat: {green['power']}")
+                print(f"TOTAL POWER: {blue['power'] + red['power'] + green['power']}")
+                print("-" * 100)
                 return blue["power"], red["power"], green["power"]
             else:
                 if blue['power'] < red['power']:
@@ -319,8 +332,14 @@ def simulation(board, instructions):
                         blue['power'] *= 5
                         green['power'] *= 3
                 print("\n")
-                print("-" * 30)
-                print("GAME OVER: All cats reached their bed!")
+                print("-" * 100)
+                print("GAME OVER: 15 turns have passed!")
+                print(f"Final Results:")
+                print(f"Blue Cat: {blue['power']}")
+                print(f"Red Cat: {red['power']}")
+                print(f"Green Cat: {green['power']}")
+                print(f"TOTAL POWER: {blue['power'] + red['power'] + green['power']}")
+                print("-" * 100)
                 return blue["power"], red["power"], green["power"]
             else:
                 if blue['power'] < green['power']:
@@ -353,8 +372,14 @@ def simulation(board, instructions):
                         red['power'] *= 5
                         green['power'] *= 3
                 print("\n")
-                print("-" * 30)
-                print("GAME OVER: All cats reached their bed!")
+                print("-" * 100)
+                print("GAME OVER: 15 turns have passed!")
+                print(f"Final Results:")
+                print(f"Blue Cat: {blue['power']}")
+                print(f"Red Cat: {red['power']}")
+                print(f"Green Cat: {green['power']}")
+                print(f"TOTAL POWER: {blue['power'] + red['power'] + green['power']}")
+                print("-" * 100)
                 return blue["power"], red["power"], green["power"]
             else:
                 if red['power'] < green['power']:
@@ -375,8 +400,14 @@ def simulation(board, instructions):
             if red['pos'] == RED_CAT_BED and green['pos'] == GREEN_CAT_BED:
                 blue['power'] *= 5
                 print("\n")
-                print("-" * 30)
-                print("GAME OVER: All cats reached their bed!")
+                print("-" * 100)
+                print("GAME OVER: 15 turns have passed!")
+                print(f"Final Results:")
+                print(f"Blue Cat: {blue['power']}")
+                print(f"Red Cat: {red['power']}")
+                print(f"Green Cat: {green['power']}")
+                print(f"TOTAL POWER: {blue['power'] + red['power'] + green['power']}")
+                print("-" * 100)
                 return blue["power"], red["power"], green["power"]
             elif red['pos'] == RED_CAT_BED or green['pos'] == GREEN_CAT_BED:
                 blue['power'] *= 3
@@ -387,8 +418,14 @@ def simulation(board, instructions):
             if blue['pos'] == BLUE_CAT_BED and green['pos'] == GREEN_CAT_BED:
                 red['power'] *= 5
                 print("\n")
-                print("-" * 30)
-                print("GAME OVER: All cats reached their bed!")
+                print("-" * 100)
+                print("GAME OVER: 15 turns have passed!")
+                print(f"Final Results:")
+                print(f"Blue Cat: {blue['power']}")
+                print(f"Red Cat: {red['power']}")
+                print(f"Green Cat: {green['power']}")
+                print(f"TOTAL POWER: {blue['power'] + red['power'] + green['power']}")
+                print("-" * 100)
                 return blue["power"], red["power"], green["power"]
             elif blue['pos'] == BLUE_CAT_BED or green['pos'] == GREEN_CAT_BED:
                 red['power'] *= 3
@@ -399,8 +436,14 @@ def simulation(board, instructions):
             if blue['pos'] == BLUE_CAT_BED and red['pos'] == RED_CAT_BED:
                 green['power'] *= 5
                 print("\n")
-                print("-" * 30)
-                print("GAME OVER: All cats reached their bed!")
+                print("-" * 100)
+                print("GAME OVER: 15 turns have passed!")
+                print(f"Final Results:")
+                print(f"Blue Cat: {blue['power']}")
+                print(f"Red Cat: {red['power']}")
+                print(f"Green Cat: {green['power']}")
+                print(f"TOTAL POWER: {blue['power'] + red['power'] + green['power']}")
+                print("-" * 100)
                 return blue["power"], red["power"], green["power"]
             elif blue['pos'] == BLUE_CAT_BED or red['pos'] == RED_CAT_BED:
                 green['power'] *= 3
@@ -491,44 +534,92 @@ def simulation(board, instructions):
                     red['pos'] = None
                     red['power'] = 0
 
-        print(f"Turn {i + 1}:")
+        # print(f"Turn {i + 1}:")
 
         # print the position, power, direction, and action of each cat after each turn
         # or if it's in the bed, print that it's in the bed instead of its position
-        if blue['pos'] == BLUE_CAT_BED:
-            print(f"Blue Cat - Position: IN BED, Power: {blue['power']}")
-        else:  
-            print(f"Blue Cat - Position: {blue['pos']}, Power: {blue['power']}, Direction: {blue['dir']}, Action: {blue['action']}")
+        # if blue['pos'] == BLUE_CAT_BED:
+        #     print(f"Blue Cat - Position: IN BED, Power: {blue['power']}")
+        # else:  
+        #     print(f"Blue Cat - Position: {blue['pos']}, Power: {blue['power']}, Direction: {blue['dir']}, Action: {blue['action']}")
         
-        if red['pos'] == RED_CAT_BED:
-            print(f"Red Cat - Position: IN BED, Power: {red['power']}")
-        else:
-            print(f"Red Cat - Position: {red['pos']}, Power: {red['power']}, Direction: {red['dir']}, Action: {red['action']}")
+        # if red['pos'] == RED_CAT_BED:
+        #     print(f"Red Cat - Position: IN BED, Power: {red['power']}")
+        # else:
+        #     print(f"Red Cat - Position: {red['pos']}, Power: {red['power']}, Direction: {red['dir']}, Action: {red['action']}")
         
-        if green['pos'] == GREEN_CAT_BED:
-            print(f"Green Cat - Position: IN BED, Power: {green['power']}")
-        else:
-            print(f"Green Cat - Position: {green['pos']}, Power: {green['power']}, Direction: {green['dir']}, Action: {green['action']}")
-        print("-" * 100)
+        # if green['pos'] == GREEN_CAT_BED:
+        #     print(f"Green Cat - Position: IN BED, Power: {green['power']}")
+        # else:
+        #     print(f"Green Cat - Position: {green['pos']}, Power: {green['power']}, Direction: {green['dir']}, Action: {green['action']}")
+        # print("-" * 100)
     
-    # print final results after 15 turns
+
+    # print("Generated Instructions:")
+    # for i in range(5):
+    #     for j in range(5):
+    #         if instructions[i][j] is not None:
+    #             print(f"{instructions[i][j]}" + (" " * (30 - len(str(instructions[i][j])))) , end=" ")
+    #         else:
+    #             print("None" + (" " * 26), end=" ")
+    #     print()  # New line after printing all instructions
+
+    # # print final results after 15 turns
+    # print("\n")
+    # print("-" * 100)
+    # print("GAME OVER: 15 turns have passed!")
+    # print(f"Final Results:")
+    # print(f"Blue Cat: {blue['power']}")
+    # print(f"Red Cat: {red['power']}")
+    # print(f"Green Cat: {green['power']}")
+    # print(f"TOTAL POWER: {blue['power'] + red['power'] + green['power']}")
+    # print("-" * 100)
+    return blue["power"], red["power"], green["power"]
+
+def print_board(board):
+    print("Generated Game Board:")
+    for row in board:
+        print(" | ".join(row))
+        print("-" * 22)  # Separator between rows
+    
+def print_instructions(instructions):
+    print("Generated Instructions:")
+    for i in range(5):
+        for j in range(5):
+            if instructions[i][j] is not None:
+                print(f"{instructions[i][j]}" + (" " * (30 - len(str(instructions[i][j])))) , end=" ")
+            else:
+                print("None" + (" " * 26), end=" ")
+        print()  # New line after printing all instructions
+
+def print_results(blue, red, green):
     print("\n")
     print("-" * 100)
     print("GAME OVER: 15 turns have passed!")
     print(f"Final Results:")
-    print(f"Blue Cat: {blue['power']}")
-    print(f"Red Cat: {red['power']}")
-    print(f"Green Cat: {green['power']}")
-    print(f"TOTAL POWER: {blue['power'] + red['power'] + green['power']}")
+    print(f"Blue Cat: {blue}")
+    print(f"Red Cat: {red}")
+    print(f"Green Cat: {green}")
+    print(f"TOTAL POWER: {blue + red + green}")
     print("-" * 100)
-    return blue["power"], red["power"], green["power"]
 
-    
+
 def main():
     # Example usage of the simulation with randomly generated instructions
-    board, instructions, budget = ig.generate_instructions(42)
-    score = simulation(board, instructions)
+
+    # Generating as many simulations as possible in 1 minute time constraint
+    start_time = time.time()
+    end_time = start_time + 60  # Run for 60 seconds
+
+    i = 0
+    while True:  # Arbitrary large number to keep generating simulations until time runs out
+        board, instructions, budget = ig.generate_instructions(i)
+        score = simulation(board, instructions)
+        if time.time() >= end_time:
+            break
+        i += 1
     
+    print(f"Generated {i} simulations in 1 minute.")
         
 if __name__ == "__main__":
     main()

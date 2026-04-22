@@ -73,13 +73,13 @@ def board_generation(seed):
     for _ in range(3):
         pos = remaining_tiles.pop()
         game_board[pos[0]][pos[1]] = EMPTY_TILE
-        
-    # Print the generated board
-    print("Generated Game Board:")
-    for row in game_board:
-        print(" ".join(row))
-    return game_board
 
+    # print the generated board
+    # for row in game_board:
+    #     print(" ".join(row))
+    # print("\n")
+    return game_board
+    
 
 def main():
     # Generate the game board

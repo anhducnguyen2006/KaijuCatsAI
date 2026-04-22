@@ -9,7 +9,7 @@ import copy
 import random
 
 import BoardGeneration as bg
-from GameSimulation import simulation
+from GameSimulation import print_board, print_instructions, print_results, simulation
 from SimulatedAnnealer import SimulatedAnnealer
 from State import State, budget_used, get_slots, BUDGET
 
@@ -47,8 +47,7 @@ def main():
     print("KaijuCats Instruction Solver (Simulated Annealing)")
     print("=" * 60 + "\n")
 
-    best_state, best_score = solve(seed=seed, restarts=100, iterations=2000, 
-                                   init_temp=500.0, decay_rate=0.997)
+    best_state, best_score = solve(seed=seed, restarts=100, iterations=2000, init_temp=500.0, decay_rate=0.997)
 
     used = budget_used(best_state.instructions)
     print(f"Best total power found: {best_score:.0f}")
@@ -60,7 +59,10 @@ def main():
     print("Running final simulation with optimized instructions:")
     print("=" * 60)
     board = bg.board_generation(seed)
-    simulation(copy.deepcopy(board), copy.deepcopy(best_state.instructions))
+    b, r , g = simulation(copy.deepcopy(board), copy.deepcopy(best_state.instructions))
+    print_board(board)
+    print_instructions(best_state.instructions)
+    print_results(b, r, g)
 
 
 if __name__ == "__main__":
